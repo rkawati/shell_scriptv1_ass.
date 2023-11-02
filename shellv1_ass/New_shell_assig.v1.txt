@@ -1,0 +1,789 @@
+
+
+                                              SHELL SCRIPT ASSIGNMENT
+##################################################################################################################
+#Script name-  Que01                                                                                             #
+#Version- 01                                                                                                     #
+#Date -25/10/23                                                                                                  #
+#Purpose -Write a shell script that lists all files in a specified directory and saves the output to a text file.#
+##################################################################################################################
+
+#!/bin/bash
+DIR=$1
+TEXT_FILE=file.txt
+if [[ $# != 1 ]]
+then
+   echo -e "This script requaired 1 argument"
+   echo -e "Usage: $0 <DIR>"
+   exit
+fi
+if [[ -d $DIR ]]
+then
+    echo -e "$DIR  is exsits"
+     find $DIR -type f > $TEXT_FILE
+    echo -e "All files are present in $TEXT_FILE"
+else
+    echo -e "$DIR is not exsits"
+fi
+================================================================================================================================================================================================================================================
+#####################################################################################################################
+#Script name-  Que02                                                                                                #
+#Version- 01                                                                                                        #
+#Date -26/10/23                                                                                                     #
+#Purpose -Write a shell script to monitor disk usage and send an email alert if usage exceeds a specified threshold.#
+#####################################################################################################################
+
+#!/bin/bash
+   ALERT=$1
+   EMAIL_ID=$2
+   
+   function Mail () 
+{ 
+echo -e "
+Hello All
+    This is system generated email, do not reply to this email.
+ 
+    Partitions on host `/bin/hostname` is reached to threshold. 
+    Kindly take necessary action ASAP to avoid future inconvenience.
+Thank & Regards
+ABC
+} 
+   if [[ $# != 2 ]]
+   then
+      echo -e "This script requaired exact 2 arguments"
+      echo -e "Usage: $0 <ALERT> <EMAIL_ID>"
+     exit
+ fi
+ 
+ echo -e "Cheking disk space"
+   CMD=`df -hT | grep /dev/sda1 | awk '{print $6}'`
+  if [[ $CMD < $ALERT ]]
+  then
+      echo -e "Sending msg.alert to $EMAIL_ID"
+	  mail -s "Disk storage alert" $EMAIL_ID
+  else
+      echo -e "your disk have space"
+  fi
+
+================================================================================================================================================================================================================================================
+#######################################################################################################################
+#Script name-  Que03                                                                                                  #
+#Version- 01                                                                                                          #
+#Date -25/10/23                                                                                                       #
+#Purpose -Write a shell script that checks whether a specified service is running and restarts it if it's not running.#
+#######################################################################################################################
+
+SERVICE=$1
+if [[ $# != 1 ]]
+then
+   echo -e "servise requaired atleast one arg"
+   echo "Usage: $0 [ $SERVICE ]"
+   exit
+fi
+  systemctl status $SERVICE
+   EX_STAT=$?
+if [[ $EX_STAT == 0 ]]
+then
+   echo -e "service is running"
+else
+   echo -e "service is not running"
+   sudo apt install apache2
+   systemctl start apache2
+fi
+========================================================================================================================
+========================================================================================================================
+#######################################################################################################################
+#Script name-  Que04                                                                                                  #
+#Version- 01                                                                                                          #
+#Date -25/10/23                                                                                                       #
+#Purpose -Write a script that backs up a specified directory to a remote server using 'rsync' ans SSH                 #
+#######################################################################################################################
+
+#!/bin/bash
+
+DIR=$1
+RMT_USER=$2
+RMT_IP=$3
+RMT_PATH=$4
+
+if [[ $# != 4 ]]
+then
+    echo -e "THis script required FOUR argument"
+    echo -e "Usage: $0 <DIR> <RMT_USER> <RMT_IP> <RMT_PATH>"
+    exit
+fi
+    if [[ -d $DIR ]]
+    then
+    echo -e "$DIR is exsits"
+    rsync -avzh $DIR $RMT_USER@ $RMT_IP:/$RMT_PATH
+    echo -e "$DIR this directory sent it to $RMT_PATH"
+else 
+    echo -e "directory does not exsits please enter correct dir. name"
+fi    ========================================================================================================================
+========================================================================================================================
+#######################################################################################################################
+#Script name-  Que05                                                                                                  #
+#Version- 01                                                                                                          #
+#Date -25/10/23                                                                                                       #
+#Purpose -Write a shell script that checks for software updates and installs them automatically.                      #
+########################################################################################################################
+
+*ON VM*
+
+#!/bin/bash
+    echo -e "check the update list"
+    yum check-update
+
+    shopt -s nocasematch
+    read -p "Do you want to updates software? (Y/N):"   CHOICE
+if [[ $CHOICE == Y ]]
+then
+    yum  update
+    echo -e "upgrade software is completed"
+else
+    echo -e "You dont want to update,ok THANKS"
+    shopt -u nocasematch
+fi
+
+
+--------------------------------------------------------------------------
+
+*ON UBUNTU*
+
+#!/bin/bash
+    echo -e "check the update list"
+    apt list --upgradable
+    shopt -s nocasematch
+    read -p "Do you want to updates software? (Yes/No):"   CHOICE
+if [ $CHOICE == Yes ]
+then
+    sudo apt-get update
+    echo -e "upgrade software is completed"
+else
+    echo -e "You dont want to update,ok THANKS"
+    shopt -u nocasematch
+fi
+========================================================================================================================
+========================================================================================================================
+#######################################################################################################################
+#Script name-  Que06                                                                                                  #
+#Version- 01                                                                                                          #
+#Date -25/10/23                                                                                                       #
+#Purpose -Write a script that compresses and archives log files older than a certain number of days.                  #
+#######################################################################################################################
+#!/bin/bash
+NO_OF_DAYS=$1
+L_FILE="/var/log/"
+
+if [[ $# != 1 ]]
+then
+   echo -e "this script requaired atleast one argument"
+   "Usage: $0 <NO_OF_DAYS>"
+   exit
+fi
+find $L_FILE/. \( -name . -o -prune \) -type f -mtime -$NO_OF_DAYS
+EX_STAT=$?
+if [[ $? == 0 ]]
+then
+    echo -e "These are log files older than a $NO_OF_DAYSii"
+    read -p " Do you want to compress this files? (Yes/No):" ANS
+ if [[ $ANS == Yes ]]
+ then
+    find "$L_FILE" -type f  -mtime +$NO_OF_DAYS ! -name '*.gz' -exec gzip {} \;
+    echo -e "log file compression is done"
+else
+    echo -e "In log file $NO_OF_DAYS  older file is not available"
+fi
+ fi
+========================================================================================================================
+========================================================================================================================
+#######################################################################################################################
+#Script name-  Que07                                                                                                  #
+#Version- 01                                                                                                          #
+#Date -25/10/23                                                                                                       #
+#Purpose-Write a shell script that generates a report of system resource usage, including CPU, memory, and disk usage.#
+#######################################################################################################################
+#!/bin/bash
+
+USER=$1
+if  [[ $# != 1 ]]
+then
+  echo -e "this script requaired atleast 1 argument"
+  echo -e "Usage: $0  <USER>"
+  exit
+fi
+  cat /etc/passwd | grep $USER
+  ex_STAT=$?
+if [[ $? == 0 ]]
+then
+  echo -e "user is present in /etc/passwd"
+  echo -e "see the total disk space used by a $USER"
+  du -sh /home/$USER
+else
+  echo -e "user not present"
+fi
+========================================================================================================================
+========================================================================================================================
+#######################################################################################################################
+#Script name-  Que08                                                                                                  #
+#Version- 01                                                                                                          #
+#Date -26/10/23                                                                                                       #
+#Purpose- Write a script that monitors a list of websites and sends an email notification if any of them are down.    #
+#######################################################################################################################         
+========================================================================================================================
+========================================================================================================================
+#!/bin/bash
+
+WEB_SIDE=$1
+EMAIL_ID=$2
+
+if [[  $# != 2 ]]
+then
+   echo -e "This script requaired exact 2 arguments"
+   echo -e "Usage: $0 <WEB_SIDE> <EMAIL_ID>"
+   exit
+fi
+    if   [[ $WEB_SIDE -gt 200 ]]
+    then
+        echo -e "$WEB_SIDE is up and running"
+        #$EMAIL_ID "$WEB_SIDE is up"
+    else
+        echo -e "$WEB_SIDE is down."
+        #EMAIL_ID "$WEB_SIDE is down"
+    fi
+        if [[ $WEB_SIDE == 0 ]]
+        then
+            echo -e  "Failed to connect to $WEB_SIDE"
+        fi
+
+
+#######################################################################################################################
+#Script name-  Que09                                                                                                  #
+#Version- 01                                                                                                          #
+#Date -25/10/23                                                                                                       #
+#Purpose-Write a shell script that scans a directory for files matching a certain pattern and deletes them.           #
+#######################################################################################################################
+========================================================================================================================
+=======================================================================================================================
+#!/bin/bash
+DIR=$1
+PATTERN=$2
+if [[ $# != 2 ]]
+then
+    echo -e "This script requaired exact two arguments"
+    echo -e "Usage: $0 <DIR> <PATTERN>"
+    exit
+fi
+    if [[ -d $DIR ]]
+    then
+        echo -e "directory is exsits and delete the $PATTERN"
+         cd $DIR
+         find ./ -name "*.$PATTERN" -exec rm -rf {} \;
+    else
+        echo -e "directory is not exsits"
+    fi
+
+#######################################################################################################################
+#Script name-  Que10                                                                                                  #
+#Version- 01                                                                                                          #
+#Date -25/10/23                                                                                                       #
+#Purpose- Write a shell script that fetches data from an AWS EC2 API and processes the JSON response to print instance# IDs and its public and private address.                                                                               #
+#######################################################################################################################
+=======================================================================================================================
+========================================================================================================================
+#!/bin/bash
+ 
+which aws 
+if [[ $? == 0 ]]
+then
+    echo "Aws client is installed"
+else
+    echo "Aws cli is not installed"
+    read -p "Do you want to install aws cli? (Y/N)" ANS
+    shopt -s nocasematch
+        if [[ $ANS == "Y" ]]
+        then
+          echo "Installing AWS CLI"
+          curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
+          unzip awscli-bundle.zip
+          ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
+        else    
+            echo "Thank you !!"
+            exit 0
+        fi
+    shopt -u nocasematch
+fi
+
+#######################################################################################################################
+#Script name-  Que11                                                                                                  #
+#Version- 01                                                                                                          #
+#Date -25/10/23                                                                                                       #
+#Purpose-Write a shell script that adds new users to the system based on a list of names in a CSV file.               #
+#######################################################################################################################
+#!/bin/bash
+FILE="/etc/passwd"
+CSV_FILE=$1
+if [[ $# != 1 ]]
+then
+ echo -e "This script requaired exact one argument"
+ echo -e "Usage: $0 <CSV_FILE>"
+ exit
+fi
+  while IFS=':' read -r col1
+  do
+    adduser $col1
+    EX_ST=$?
+    if [ $? == 0 ]
+    then
+      echo -e "useradd in $FILE"
+    else 
+       echo -e  "$1 already added as a user"
+    fi
+done < $CSV_FILE
+
+
+========================================================================================================================
+========================================================================================================================
+#######################################################################################################################
+#Script name-  Que12                                                                                                  #
+#Version- 01                                                                                                          #
+#Date -25/10/23                                                                                                       #
+#Purpose-  Write a script that periodically syncs a local directory with a remote server using 'rsync' and 'cron'.    #
+#######################################################################################################################
+#!/bin/bash
+
+DIR=$1
+RMT_USER=$2
+RMT_IP=$3
+RMT_PATH=$4
+
+if [[ $# != 4 ]]
+then
+    echo -e "THis script required FOUR argument"
+    echo -e "Usage: $0 <DIR> <RMT_USER> <RMT_IP> <RMT_PATH>"
+    exit
+fi
+    if [[ -d $DIR ]]
+    then
+    echo -e "$DIR is exsits"
+    rsync -avzh $DIR $RMT_USER@ $RMT_IP:/$RMT_PATH
+    echo -e "$DIR this directory sent it to $RMT_PATH"
+else 
+    echo -e "directory does not exsits please enter correct dir. name"
+fi    
+-----------------------------------------------------------------
+
+
+
+========================================================================================================================
+========================================================================================================================
+#######################################################################################################################
+#Script name-  Que13                                                                                                  #
+#Version- 01                                                                                                          #
+#Date -25/10/23                                                                                                       #
+#Purpose- Write a shell script that automates the process of setting up a new virtual host on a web server.           #
+#######################################################################################################################
+DOMAIN_NAME=$1
+if [[ $# != 1 ]]
+then
+    echo -e "This script requaired exact one argument"
+    echo -e "Usage: $0 <DOMAIN_NAME>
+    exit
+fi
+    echo -e "$1 service status running or not"
+    systemctl status httpd >/dev/null 2>&1
+if [[ $? -gt 0 ]]
+then
+    echo -e "please install httpd, and Rerun the command"
+fi
+   systemctl status httpd
+if [[ $? == 0 ]]
+    echo -e "httpd service is installed"
+echo -e "index.html and conf file for the $DOMAIN"
+echo -e "Doctype html"
+<html>
+   <head>
+     <title>welcome to  $DOMAIN_NAME</title>
+   </head>
+   <body>
+        <h1>Welcome!</h1>
+   </body>
+ </html>" >/var/www/html/index.html
+ echo -e "=============================="
+systemctl stop firewalld
+fi
+
+=======================================================================================================================
+========================================================================================================================
+#######################################################################################################################
+#Script name-  Que14                                                                                                  #
+#Version- 01                                                                                                          #
+#Date -25/10/23                                                                                                       #
+#Purpose-Write a script that compares two directories and reports any differences in their content.                   #
+#######################################################################################################################
+#!/bin/bash
+
+DIR1=$1
+DIR2=$2
+
+if [[ $# != 2 ]]
+then
+   echo -e "This script requaired exact 2 arguments"
+   echo -e "Usage: $0 <DIR1> <DIR2>"
+   exit
+fi
+if [[ -d $DIR1 ]] && [[ -d $DIR2 ]]
+then
+    echo -e "both directories are exsits"
+    sdiff $DIR1 $DIR2
+    echo -e "See above difference between $DIR1 and $DIR2"
+else
+    echo -e "Any one or both directories are not exsits,please renter  directory name"
+fi
+
+
+=======================================================================================================================
+========================================================================================================================
+#######################################################################################################################
+#Script name-  Que15                                                                                                  #
+#Version- 01                                                                                                          #
+#Date -25/10/23                                                                                                       #
+#Purpose-                                                                                                             #
+#######################################################################################################################
+
+#!/bin/bash
+
+#Write a shell script that finds and lists all files in a directory tree that have not been accessed in a specified number of days.
+
+DIR=$1
+NO_OF_DAYS=$2
+
+if [[ $# != 2 ]]
+then
+    echo -e "this script requaired atleast 2 arguments"
+    echo -e "Usage: $0 <DIR> <NO_OF_DAYS>"
+    exit
+fi
+if [[ -d $DIR ]]
+then
+   echo -e "directory is exsits"
+
+ find $DIR -type f -atime +$NO_OF_DAYS -exec ls -lhrt {} \;
+echo -e "These files has not been accessed in $NO_OF_DAYS number of days"
+else
+   echo -e "directory does not exsits"
+fi
+
+========================================================================================================================
+========================================================================================================================
+#######################################################################################################################
+#Script name-  Que16                                                                                                  #
+#Version- 01                                                                                                          #
+#Date -25/10/23                                                                                                       #
+#Purpose- Write a shell script that automatically organizes files in a directory based on their file types.           #
+(e.g., images, documents, audio files).                                                                               #
+#######################################################################################################################
+#Write a shell script that automatically organizes files in a directory based on their file types.(e.g., images, documents, audio files).                                                                               #
+#!/bin/bash
+DIR=$1
+if [ $# != 1 ]
+then
+   echo -e "This script requaired exact one argument"
+   echo -e "Usage: $0 <DIR>"
+   exit
+fi
+rm -rf other.doc
+ls -1 $DIR 
+case $col1 in
+csv)
+   echo -e "image file move in image.csv"
+        mkdir  image.csv
+        mv $DIR/image $DIR/image.csv
+        ;;
+txt)
+    echo -e "documents file move in doc.txt"
+        mkdir doc.txt
+        mv $DIR/documents $DIR/doc.txt
+        ;;
+jpg)
+    echo -e "audio file move in audio.jpg"
+        mkdir audio.jpg
+        mv $DIR/audio $DIR/audio.jpg
+        ;;
+    *)
+    echo -e "Remaining files are move in to other.doc"
+         touch  other.doc
+          find $DIR -not -name "*.csv" -and -not -name "*.txt" -and -not -name "*.jpg" > other.doc
+         ;;
+    esac 
+    
+========================================================================================================================
+========================================================================================================================
+#######################################################################################################################
+#Script name-  Que17                                                                                                  #
+#Version- 01                                                                                                          #
+#Date -25/10/23                                                                                                       #
+#Purpose-Write a script that checks for and reports any failed SSH login attempts on a Linux server.                  #
+#######################################################################################################################
+
+#!/bin/bash
+
+FILE="/var/log/secure"
+
+if [[ -f $FILE  ]]
+then
+   echo -e "file is exsits"
+   read -p  "do you want to check bad attempt? (yes/no):" ANS
+   #read $ANS
+     if [[ "$ANS" == "yes" ]]
+     then
+    BLOG=`cat /var/log/secure |grep 'Failed password' |wc -l`
+
+        echo "$BLOG see the bad logging list"
+     else
+        echo "ok, Thank you"
+      fi
+else
+    echo -e "log file not exsist"
+     fi
+
+
+=======================================================================================================================
+=======================================================================================================================
+#######################################################################################################################
+#Script name-  Que18                                                                                                  #
+#Version- 01                                                                                                          #
+#Date -25/10/23                                                                                                       #
+#Purpose- Write a shell script that monitors a specified file for changes and executes a specific action when the file#
+#is modified.                                                                                                         #
+#######################################################################################################################
+#!/bin/bash
+#Write a shell script that monitors a specified file for changes and executes a specific action when the file is modified.
+TIME=$1
+DIR=$2
+ if [ $# != 2 ]
+ then
+    echo -e "this script requaired atleast two arguments"
+    echo -e "Usage: $0 <TIME> <DIR>"
+    exit
+fi
+if [ -d $DIR ]
+then
+    echo -e "Directory is exsits"
+
+find "$DIR" -type f -mmin -$TIME -exec ls -lhrt {} \; | wc -l
+     echo -e "In $DIR these files are modified of last $TIME you can also see the count of line no. of modified"
+else
+     echo -e "No changes found in $DIR from $TIME"
+fi
+
+========================================================================================================================
+========================================================================================================================
+#######################################################################################################################
+#Script name-  Que19                                                                                                  #
+#Version- 01                                                                                                          #
+#Date -25/10/23                                                                                                       #
+#Purpose-                                                                                                             #
+#######################################################################################################################
+DB_NAME=$1
+DB_USER=$2
+NEW_DB_PAWD=$3
+
+if [[ $# != 3 ]]
+then
+   echo -e "this script required 3 argument"
+   echo -e "Usage: <DB_NAME> <DB_USER> <NEW_DB_PAWD>"
+   exit
+fi
+   read -p "enter your service name: " SERVICE
+   systemctl status $SERVICE
+   EXT_STAT=$?
+if [[ $EXT_STAT == 0 ]]
+then
+  echo -e "service is running"
+  mysql -h localhost -u root -p -e "create database $DB_NAME;"
+  mysql_secure_installation
+  mysql -h localhost -u root -p -e "CREATE USER 'username'@'host'IDENTIFIED WITH authentication_plugin BY 'root';"
+else
+   echo -e "$SERVICE is not running"
+fi
+
+
+========================================================================================================================
+========================================================================================================================
+#######################################################################################################################
+#Script name-  Que20                                                                                                  #
+#Version- 01                                                                                                          #
+#Date -25/10/23                                                                                                       #
+#Purpose-Write a shell script that retrieves the current weather for a specified location using a weather API.        #
+#######################################################################################################################
+
+#!/bin/bash
+LOCATION=$1
+
+if [[ $# != 1 ]]
+then
+    echo -e "This script requaired exact one argument"
+    echo -e "Usage: $0 [LOCATION]"
+    exit
+fi
+    curl wttr.in/$LOCATION | grep date
+    EX_STAT=$?
+if [[ $EX_STAT == 0 ]]
+then
+    echo -e "see the weather report of the $LOCATION"
+else
+    echo -e "curl command not found"
+fi
+
+
+
+========================================================================================================================
+========================================================================================================================
+#######################################################################################################################
+#Script name-  Que21                                                                                                  #
+#Version- 01                                                                                                          #
+#Date -25/10/23                                                                                                       #
+#Purpose-   Write a script that calculates the total disk space used by a specified user and outputs the result.      #
+#######################################################################################################################
+#!/bin/bash
+USER=$1
+if  [[ $# != 1 ]]
+then
+  echo -e "this script requaired atleast 1 argument"
+  echo -e "Usage: $0 <USER>"
+  exit
+fi
+  cat /etc/passwd | grep $USER
+  if [ $? -eq 0 ]
+  then
+    echo -e "user is present in /etc/passwd"
+    echo -e "see the total disk space used by a $USER"
+     du -sh /home/"$cloud" | cut -f1
+else
+    echo -e "user not present"
+  fi
+=======================================================================================================================
+========================================================================================================================
+#######################################################################################################################
+#Script name-  Que22                                                                                                  #
+#Version- 01                                                                                                          #
+#Date -25/10/23                                                                                                       #
+#Purpose- #Write a shell script that sends a daily summary of system logs via email.                                  #
+#######################################################################################################################
+
+#!/bin/bash
+MAIL_ID=$1
+OUTPUT_FILE=$2
+
+ if [[ $# != 2 ]]
+ then
+   echo -e "This script requaired exact 2 arguments"
+   echo -e "Usage: $0 <MAIL_ID><OUTPUT_FILE>"
+   exit
+fi
+#set output file for system report.
+less /var/log/messages > $OUTPUT_FILE
+echo -e "copy succefully daily summary of system report log in $OUTPUT_FILE"
+mail -s "All system related logs" $MAIL_ID
+
+
+========================================================================================================================
+========================================================================================================================
+#######################################################################################################################
+#Script name-  Que23                                                                                                  #
+#Version- 01                                                                                                          #
+#Date -25/10/23                                                                                                       #
+#Purpose-                                                                                                             #
+#######################################################################################################################
+#!/bin/bash
+
+DIR=$1
+STRING1=$2
+STRING2=$3
+if [[ $# != 3 ]]
+then
+    echo -e "This script requaired exact 3 arguments"
+    echo -e "Usage: $0 <DIR> <STRING1> <STRING2>"
+    ext
+fi
+    if [[ -d $DIR ]]
+    then
+        echo -e "directory is exsits"
+        cd $DIR
+        find . -type f -exec sed -i "s/$STRING1/$STRING2/gI" {} \;
+        EX_STAT=$?
+            if [[ $EX_STAT == 0 ]]
+            then
+                echo -e "$STRING1 is replace with $STRING2, for confirmation you can check $DIR"
+            else
+                echo -e "$DIR is not exsist, please enter correct directory name"
+            fi
+    fi
+
+
+
+=======================================================================================================================
+========================================================================================================================
+#######################################################################################################################
+#Script name-  Que24                                                                                                  #
+#Version- 01                                                                                                          #
+#Date -25/10/23                                                                                                       #
+#Purpose-Write a shell script that renames a large number of files based on a specified pattern or naming convention. #
+#######################################################################################################################
+DIR=$1
+OLD_NAME=$2
+NEW_NAME=$3
+if [[ $# != 3 ]]
+then
+    echo -e "This script requaired atleast 3 arguments"
+    echo -e "Usage: $0 <DIR> <OLD_STRING> <NEW_STRING>"
+    exit
+fi
+if  [[ ! -d $DIR ]]
+then
+    echo -e "directory not  exsits please enter correct name"
+fi
+    echo -e "directory is exsits"
+         find $DIR | grep $OLD_NAME
+         read -p "file is exsits in directory, you want to change file name? (yes/no):" ANS
+  #read $ANS
+if [[ "$ANS" == "yes" ]]
+then
+      cd $DIR
+      mv "$OLD_NAME" "$NEW_NAME"
+        echo -e "NAME change succesfully $OLD_NAME to $NEW_NAMEin $DIR"
+else
+        echo -e  "ok, Thank you"
+fi
+
+========================================================================================================================
+========================================================================================================================
+#######################################################################################################################
+#Script name-  Que25                                                                                                  #
+#Version- 01                                                                                                          #
+#Date -25/10/23                                                                                                       #
+#Purpose- Write a script that generates and emails a report of newly created user accounts on a Linux system within   #
+the last 24 hours.                                                                                                    #
+                                                                                                                      #
+#######################################################################################################################
+#Write a script that generates and emails a report of newly created user accounts on a Linux system within the last 24 hours.
+MAIL_ID=$1
+REPORT_FILE=$2
+USER_FILE=`etc/password/`
+if [[ $# != 2 ]]
+then
+    echo -e "This script requaired atleast 2 arguments"
+    echo -e "Usage: $0 <MAIL_ID> <REPORT_FILE>"
+    exit
+fi
+      lslogins -u
+    if  [[ $? == 0 ]]
+    then
+        echo -e "list of added new users from last 24 hours"
+        mail -s "new created users from last 24 hours." $MAIL_ID
+    else
+        echo -e "No useradd inyour system from last 24 hours"
+    fi
+========================================================================================================================
+
